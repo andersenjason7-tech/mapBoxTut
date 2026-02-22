@@ -61,6 +61,11 @@ function App() {
         const coordinates = e.features[0].geometry.coordinates.slice();
         const [longitude, latitude] = coordinates;
 
+        const properties = e.features[0].properties;
+        const earthquakeId = properties.id || 'N/A';
+        const earthquakeTime = properties.time ? new Date(properties.time).toLocaleString('en-US')  : 'N/A';
+        const earthquakeMagnitude = properties.mag || 'N/A';
+
         // Ensure that if the map is zoomed out such that multiple
         // copies of the feature are visible, the popup appears
         // over the copy being pointed to.
@@ -74,6 +79,9 @@ function App() {
           .setHTML(`
             <div style="padding: 8px;">
               <strong>Location</strong><br/>
+              <strong>ID:</strong> ${earthquakeId}<br/>
+              <strong>Time:</strong> ${earthquakeTime}<br/>
+              <strong>Magnitude:</strong> ${earthquakeMagnitude}<br/>
               Latitude: ${latitude.toFixed(4)}<br/>
               Longitude: ${longitude.toFixed(4)}
             </div>
