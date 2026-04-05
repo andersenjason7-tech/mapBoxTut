@@ -34,22 +34,7 @@ function App() {
 
        // Add source and layer on map load
     mapRef.current.on('load', () => {
-      mapRef.current.addSource('earthquakes', {
-        type: 'geojson',
-        data: 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson'
-      });
-
-      mapRef.current.addLayer({
-        id: 'earthquakes',
-        type: 'circle',
-        source: 'earthquakes',
-        paint: {
-          'circle-radius': 4,
-          'circle-stroke-width': 2,
-          'circle-color': '#f00',
-          'circle-stroke-color': 'white'
-        }
-      });
+ 
 
 //add the temple layer to the map
 //first add the image to the map
@@ -59,7 +44,10 @@ function App() {
     mapRef.current.addImage('temple-icon', image);
   });
 
-
+     mapRef.current.addSource('earthquakes', {
+        type: 'geojson',
+        data: 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson'
+      });
   // Add another source/layer
   mapRef.current.addSource('temples', {
     type: 'geojson',
@@ -80,6 +68,21 @@ function App() {
    
     }
   });
+
+
+  mapRef.current.addLayer({
+        id: 'templeCircles',
+        type: 'circle',
+        source: 'temples',
+        paint: {
+          'circle-radius': 14,
+          'circle-stroke-width': 2,
+          'circle-color': 'rgb(247, 235, 235)',
+          'circle-stroke-color': 'white',
+          'circle-opacity': 0.8
+        }
+      });
+  
       // Change cursor on hover
       mapRef.current.on('mouseenter', 'earthquakes', (e) => {
         mapRef.current.getCanvas().style.cursor = 'pointer';
@@ -162,6 +165,8 @@ function App() {
         mapRef.current.getCanvas().style.cursor = '';
         popupRef.current.remove();
       });
+
+
 
 
     });
