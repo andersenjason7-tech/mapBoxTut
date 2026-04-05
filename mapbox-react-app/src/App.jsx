@@ -8,12 +8,15 @@ import './App.css'
 const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 const center = [-104.05953, 40.36290];
 
+
+
 function App() {
 
   const mapRef = useRef()
   const mapContainerRef = useRef()
   const [inputValue, setInputValue] = useState("");
   const popupRef = useRef(null);
+  const [circleRadius, setCircleRadius] = useState(15);  // Default radius
 
   useEffect(() => {
     mapboxgl.accessToken = accessToken
@@ -75,11 +78,11 @@ function App() {
         type: 'circle',
         source: 'temples',
         paint: {
-          'circle-radius': 14,
+          'circle-radius': circleRadius,
           'circle-stroke-width': 2,
           'circle-color': 'rgb(247, 235, 235)',
           'circle-stroke-color': 'white',
-          'circle-opacity': 0.8
+          'circle-opacity': 0.6
         }
       });
   
@@ -181,6 +184,24 @@ function App() {
 
 return (
   <>
+
+    <div style={{ margin: '10px', position: 'absolute', zIndex: 10 }}>
+      <label>Circle Radius: {circleRadius}</label>
+      <input
+        type="range"
+        min="5"
+        max="200"
+        value={circleRadius}
+        onChange={(e) => {
+          const newRadius = parseInt(e.target.value);
+          setCircleRadius(newRadius);
+          if (mapRef.current) {
+            mapRef.current.setPaintProperty('templeCircles', 'circle-radius', newRadius);
+          }
+        }}
+      />
+    </div>
+
     <div style={{
         margin: '10px 10px 0 0',
         width: 300,
