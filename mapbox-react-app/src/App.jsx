@@ -16,8 +16,28 @@ function App() {
   const mapContainerRef = useRef()
   const [inputValue, setInputValue] = useState("");
   const popupRef = useRef(null);
-  const [circleRadius, setCircleRadius] = useState(15);  // Default radius
+ 
 
+const metersToPixels = (meters, zoom, lat) => {
+  const earthCircumference = 40075016.686; // meters
+  // most map providers use a tile size of 256 pixels, but this can vary
+  //every time you zoom in, the number of pixels representing a meter doubles, so we use 2^zoom
+
+  const pixelsPerMeter = (256 * Math.pow(2, zoom)) / earthCircumference;
+  // Adjust for latitude to account for the Mercator projection
+  return meters * pixelsPerMeter / Math.cos((lat * Math.PI) / 180);
+};
+
+
+const [circleDistance, setCircleDistance] = useState(1000); // Default 1km in meters
+
+
+const updateRadius = () => {
+  const zoom = mapRef.current.getZoom();
+  const lat = center[1]; // Use map center latitude
+  const radiusPixels = metersToPixels(circleDistance, zoom, lat);
+  mapRef.current.setPaintProperty('templeCircles', 'circle-radius', radiusPixels);
+};
   useEffect(() => {
     mapboxgl.accessToken = accessToken
 
@@ -78,7 +98,7 @@ function App() {
         type: 'circle',
         source: 'temples',
         paint: {
-          'circle-radius': circleRadius,
+           'circle-radius': metersToPixels(circleDistance, mapRef.current.getZoom(), center[1]),
           'circle-stroke-width': 2,
           'circle-color': 'rgb(247, 235, 235)',
           'circle-stroke-color': 'white',
@@ -174,6 +194,9 @@ function App() {
 
     });
 
+// Update radius on zoom change
+mapRef.current.on('zoom', updateRadius);
+
     return () => {
          if (mapRef.current) {
         mapRef.current.remove();
@@ -186,17 +209,21 @@ return (
   <>
 
     <div style={{ margin: '10px', position: 'absolute', zIndex: 10 }}>
-      <label>Circle Radius: {circleRadius}</label>
+      <label>Temple Circle Radius: (in meters) {circleDistance}</label>
       <input
         type="range"
-        min="5"
-        max="200"
-        value={circleRadius}
+        min="100"
+        max="100000"
+        step="100"
+        value={circleDistance}
         onChange={(e) => {
-          const newRadius = parseInt(e.target.value);
-          setCircleRadius(newRadius);
+          const newDistance = parseInt(e.target.value);
+          setCircleDistance(newDistance);
           if (mapRef.current) {
-            mapRef.current.setPaintProperty('templeCircles', 'circle-radius', newRadius);
+            const zoom = mapRef.current.getZoom();
+            const lat = center[1];
+            const radiusPixels = metersToPixels(newDistance, zoom, lat);
+            mapRef.current.setPaintProperty('templeCircles', 'circle-radius', radiusPixels);
           }
         }}
       />
